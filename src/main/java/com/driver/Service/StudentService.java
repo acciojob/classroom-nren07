@@ -1,13 +1,11 @@
 package com.driver.Service;
 
-import com.driver.Model.Student;
-import com.driver.Model.Teacher;
+import com.driver.Student;
+import com.driver.Teacher;
 import com.driver.Repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.swing.*;
-import javax.swing.text.TabExpander;
 import java.util.List;
 
 @Service
