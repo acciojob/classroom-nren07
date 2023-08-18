@@ -1,62 +1,61 @@
 package com.driver.Service;
 
+import com.driver.Repository.TeacherRepository;
 import com.driver.Student;
 import com.driver.Teacher;
-import com.driver.Repository.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.driver.Repository.StudentRepository;
+
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class StudentService {
+    @Autowired
+    private StudentRepository studentRepository;
 
     @Autowired
-    public StudentRepository studentRepository;
+    private TeacherRepository teacherRepository;
 
     public void addStudent(Student student) throws Exception{
-        //validation
-        if(student==null) throw new Exception("Student is null");
+        if(student==null) throw new Exception("Student is null Object");
         studentRepository.save(student);
-
     }
 
-    public void addTeacher(Teacher teacher) throws Exception {
-        if(teacher==null) throw new Exception("teacher is null");
-        studentRepository.save(teacher);
-    }
+    public void addStudentTeacherPair(String studentName,String teacherName) throws Exception{
 
-    public void addStudentTeacherPair(String studentName, String teacherName) throws Exception{
+        if(!studentRepository.isAvailable(studentName)) throw new Exception("student is not available");
+        if(!teacherRepository.isAvailable(teacherName)) throw new Exception("Teacher is not available");
+
+        Teacher teacher=teacherRepository.getTeacher(teacherName);
         Student student=studentRepository.getStudent(studentName);
-        Teacher teacher=studentRepository.getTeacher(teacherName);
-        if(student==null) throw new Exception("Student is not present in Db");
-        if(teacher==null) throw new Exception("Teacher is not present in Db");
-        studentRepository.pair(studentName,teacherName);
+
+        teacher.setNumberOfStudents(teacher.getNumberOfStudents()+1);
+        teacherRepository.save(teacher);
+
+        studentRepository.getList(teacherName).add(studentName);
+        teacherRepository.getList(studentName).add(teacherName);
+
     }
 
     public Student getStudentByName(String studentName){
-        return studentRepository.getStudent(studentName);
+        if(studentRepository.isAvailable(studentName)){
+            return studentRepository.getStudent(studentName);
+        }
+        return null;
     }
 
-    public Teacher getTeacherByName(String teacherName){
-        return studentRepository.getTeacher(teacherName);
+    public List<String> getStudentsByTeacherName(String teacherName) throws Exception{
+        if(!teacherRepository.isAvailable(teacherName)) throw new Exception("Teacher is not available");
+        else{
+            return studentRepository.getList(teacherName);
+        }
     }
 
-    public List<String> getStudentsByTeacherName(String teacherName){
-        Teacher teacher=studentRepository.getTeacher(teacherName);
-        return studentRepository.getList(teacher);
-    }
-
-    public List<String>getAllStudents(){
+    public List<String> getAllStudents(){
         return studentRepository.getAllStudent();
     }
 
-    public void deleteTeacher(String teacherName) throws Exception{
-        Teacher teacher=studentRepository.getTeacher(teacherName);
-        //validation
-        if(teacher==null) throw new Exception("Teacher is not preesent in Db");
-        //deletion
-        studentRepository.delete(teacher);
-    }
-    
 }

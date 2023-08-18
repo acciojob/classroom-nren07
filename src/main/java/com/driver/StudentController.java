@@ -3,6 +3,7 @@ package com.driver;
 import java.util.List;
 
 import com.driver.Service.StudentService;
+import com.driver.Service.TeacherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +23,9 @@ public class StudentController {
 
     @Autowired
     private StudentService studentService;
+
+    @Autowired
+    private TeacherService teacherService;
     @PostMapping("/add-student")
     public ResponseEntity<String> addStudent(@RequestBody Student student){
         try{
@@ -38,7 +42,7 @@ public class StudentController {
     @PostMapping("/add-teacher")
     public ResponseEntity<String> addTeacher(@RequestBody Teacher teacher){
         try{
-            studentService.addTeacher(teacher);
+            teacherService.addTeacher(teacher);
             return new ResponseEntity<>("New teacher added successfully", HttpStatus.CREATED);
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.BAD_REQUEST);
@@ -68,7 +72,7 @@ public class StudentController {
     @GetMapping("/get-teacher-by-name/{name}")
     public ResponseEntity<Teacher> getTeacherByName(@PathVariable String name){
         Teacher teacher = null; // Assign student by calling service layer method
-        teacher=studentService.getTeacherByName(name);
+        teacher=teacherService.getTeacherByName(name);
         if(teacher==null) return new ResponseEntity<>(null,HttpStatus.EXPECTATION_FAILED);
         return new ResponseEntity<>(teacher, HttpStatus.CREATED);
     }
@@ -76,8 +80,12 @@ public class StudentController {
     @GetMapping("/get-students-by-teacher-name/{teacher}")
     public ResponseEntity<List<String>> getStudentsByTeacherName(@PathVariable String teacher){
         List<String> students = null; // Assign list of student by calling service layer method
-        students=studentService.getStudentsByTeacherName(teacher);
-        return new ResponseEntity<>(students, HttpStatus.CREATED);
+        try{
+            students=studentService.getStudentsByTeacherName(teacher);
+            return new ResponseEntity<>(students, HttpStatus.CREATED);
+        }catch (Exception e){
+            return new ResponseEntity<>(students, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @GetMapping("/get-all-students")
@@ -90,7 +98,7 @@ public class StudentController {
     @DeleteMapping("/delete-teacher-by-name")
     public ResponseEntity<String> deleteTeacherByName(@RequestParam String teacher){
         try{
-            studentService.deleteTeacher(teacher);
+            teacherService.deleteTeacher(teacher);
             return new ResponseEntity<>(teacher + " removed successfully", HttpStatus.CREATED);
         }catch (Exception e){
             return new ResponseEntity<>(e.getMessage(),HttpStatus.NO_CONTENT);
@@ -99,7 +107,6 @@ public class StudentController {
     }
     @DeleteMapping("/delete-all-teachers")
     public ResponseEntity<String> deleteAllTeachers(){
-
         return new ResponseEntity<>("All teachers deleted successfully", HttpStatus.CREATED);
     }
 }
